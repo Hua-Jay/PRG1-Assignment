@@ -78,8 +78,9 @@ def initialize_game(game_map, fog, player):
     
 # This function draws the entire map, covered by the fog
 def draw_map(game_map, fog, player):
-    map = ''
+    map = '+' + '-'*len(game_map[0]) + '+\n'
     for x in range(len(game_map)):
+        map += '|'
         for y in range(len(game_map[x])):
             if x == player['x'] and y== player['y']:
                 map += 'M'
@@ -89,18 +90,28 @@ def draw_map(game_map, fog, player):
                 map += game_map[x][y]
             else:
                 map += '?'
-        map += '\n'
+        map += '|\n'
+    map += '+' + '-'*len(game_map[0]) + '+\n'
     return map
+
 def draw_view(game_map, fog, player):
-    viewport = ''
-    for x in range((0 - player['visibility']), (player['visibility'])):
-        for y in range((0 - player['visibility']), (player['visibility'])):
-            if x == player['x'] and y == player['y']:
-                viewport += 'M'
-            else:
-                viewport += game_map[x][y]
-        viewport += '\n'
+    viewport = '+' + '-'*(player['visibility']*2 + 1) + '+\n'
+    for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
+        if x < 0:
+            continue
+        else:
+            viewport += '|'
+            for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
+                if x == player['x'] and y == player['y']:
+                    viewport += 'M'
+                elif y < 0:
+                    continue
+                else:
+                    viewport += game_map[x][y]
+            viewport += '|\n'
+    viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
+
 initialize_game(game_map, fog, player)
 clear_fog(fog, player)
 print(draw_view(game_map, fog, player))

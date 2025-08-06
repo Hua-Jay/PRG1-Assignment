@@ -61,6 +61,7 @@ def initialize_game(game_map, fog, player):
     #   You will probably add other entries into the player dictionary
     player['x'] = 0
     player['y'] = 0
+    player['name'] = ''
     player['copper'] = 0
     player['silver'] = 0
     player['gold'] = 0
@@ -75,30 +76,39 @@ def initialize_game(game_map, fog, player):
     
 # This function draws the entire map, covered by the fog
 def draw_map(game_map, fog, player):
-    map = ''
+    map = '+' + '-'*len(game_map[0]) + '+\n'
     for x in range(len(game_map)):
+        map += '|'
         for y in range(len(game_map[x])):
             if x == player['x'] and y== player['y']:
-                layer += 'M'
+                map += 'M'
             elif x == 0 and y == 0:
-                layer += 'T'
+                map += 'T'
             elif fog[x][y] == ' ':
-                layer += game_map[x][y]
+                map += game_map[x][y]
             else:
                 map += '?'
-        map += '\n'
+        map += '|\n'
+    map += '+' + '-'*len(game_map[0]) + '+'
     return map
 
 # This function draws the 3x3 viewport
 def draw_view(game_map, fog, player):
-    viewport = ''
-    for x in range((0 - player['visibility']), (player['visibility'])):
-        for y in range((0 - player['visibility']), (player['visibility'])):
-            if x == player['x'] and y == player['y']:
-                viewport += 'M'
-            else:
-                viewport += game_map[x][y]
-        viewport += '\n'
+    viewport = '+' + '-'*(player['visibility']*2 + 1) + '+\n'
+    for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
+        if x < 0:
+            continue
+        else:
+            viewport += '|'
+            for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
+                if x == player['x'] and y == player['y']:
+                    viewport += 'M'
+                elif y < 0:
+                    continue
+                else:
+                    viewport += game_map[x][y]
+            viewport += '|\n'
+    viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
 
 # This function shows the information for the player
@@ -107,16 +117,25 @@ def show_information(player):
 
 # This function saves the game
 def save_game(game_map, fog, player):
+    global SAVED_MAP
+    global SAVED_FOG
+    global SAVED_PLAYER
     # save map
+    SAVED_MAP = game_map
     # save fog
+    SAVED_FOG = fog
     # save player
+    SAVED_PLAYER = player
     return
         
 # This function loads the game
 def load_game(game_map, fog, player):
     # load map
+    game_map = SAVED_MAP
     # load fog
+    fog = SAVED_FOG
     # load player
+    player = SAVED_PLAYER
     return
 
 def show_main_menu():
