@@ -77,7 +77,7 @@ def initialize_game(game_map, fog, player):
 def draw_map(game_map, fog, player):
     map = ''
     for x in range(len(game_map)):
-        for y in range(len(game_map[i])):
+        for y in range(len(game_map[x])):
             if x == player['x'] and y== player['y']:
                 layer += 'M'
             elif x == 0 and y == 0:
