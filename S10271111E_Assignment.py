@@ -48,7 +48,10 @@ def initialize_game(game_map, fog, player):
     load_map("level1.txt", game_map)
 
     # TODO: initialize fog
-    
+    fog.clear()
+    for i in range(MAP_HEIGHT):
+        fog.append('?' * MAP_WIDTH)
+
     # TODO: initialize player
     #   You will probably add other entries into the player dictionary
     player['x'] = 0
@@ -65,6 +68,7 @@ def initialize_game(game_map, fog, player):
     
 # This function draws the entire map, covered by the fof
 def draw_map(game_map, fog, player):
+    
     return
 
 # This function draws the 3x3 viewport
