@@ -112,6 +112,33 @@ def draw_view(game_map, fog, player):
     viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
 
+def save_game(game_map, fog, player):
+    global SAVED_MAP
+    global SAVED_FOG
+    global SAVED_PLAYER
+    # save map
+    SAVED_MAP = game_map
+    # save fog
+    SAVED_FOG = fog
+    # save player
+    SAVED_PLAYER = player
+    return
+        
+# This function loads the game
+def load_game(game_map, fog, player):
+    # load map
+    game_map = SAVED_MAP
+    # load fog
+    fog = SAVED_FOG
+    # load player
+    player = SAVED_PLAYER
+    return
+
 initialize_game(game_map, fog, player)
+player['x'] = 7
+player['y'] = 9
 clear_fog(fog, player)
+save_game(game_map,fog,player)
+initialize_game(game_map, fog, player)
+load_game(game_map,fog,player)
 print(draw_view(game_map, fog, player))
