@@ -30,7 +30,9 @@ def load_map(filename, map_struct):
     map_struct.clear()
     
     # TODO: Add your map loading code here
-    map_struct = map_file.read()
+    map_levels = map_file.read().split('\n')
+    for i in map_levels:
+        map_struct.append(i)
     
     MAP_WIDTH = len(map_struct[0])
     MAP_HEIGHT = len(map_struct)
