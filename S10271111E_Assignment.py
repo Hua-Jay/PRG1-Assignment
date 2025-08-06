@@ -1,9 +1,10 @@
-#S10271111E Lee Hua Jay
+#S10271111E Lee Hua Jay CSF03
 from random import randint
 
 player = {}
 game_map = []
 fog = []
+width_counter = 0
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -31,8 +32,8 @@ def load_map(filename, map_struct):
     
     # TODO: Add your map loading code here
     map_levels = map_file.read().split('\n')
-    for i in map_levels:
-        map_struct.append(i)
+    for level in map_levels:
+        map_struct.append(level)
     
     MAP_WIDTH = len(map_struct[0])
     MAP_HEIGHT = len(map_struct)
@@ -41,6 +42,11 @@ def load_map(filename, map_struct):
 
 # This function clears the fog of war at the 3x3 square around the player
 def clear_fog(fog, player):
+    for level in range(fog):
+        for width in range(fog[level]):
+            if (level > (player['y'] - player['visibility']) and level < (player['y'] + player['visibility'])) and (width > (player['x'] - player['visibility']) and width < (player['x'] + player['visibility'])):
+                fog[level][width] = ' '
+            continue
     return
 
 def initialize_game(game_map, fog, player):
@@ -63,12 +69,14 @@ def initialize_game(game_map, fog, player):
     player['day'] = 0
     player['steps'] = 0
     player['turns'] = TURNS_PER_DAY
+    player['visibility'] = 1
+    player['pickaxe level'] = 0
 
     clear_fog(fog, player)
     
-# This function draws the entire map, covered by the fof
+# This function draws the entire map, covered by the fog
 def draw_map(game_map, fog, player):
-    
+
     return
 
 # This function draws the 3x3 viewport
