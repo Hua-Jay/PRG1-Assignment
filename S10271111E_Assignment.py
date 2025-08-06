@@ -42,11 +42,10 @@ def load_map(filename, map_struct):
 
 # This function clears the fog of war at the 3x3 square around the player
 def clear_fog(fog, player):
-    for level in range(fog):
-        for width in range(fog[level]):
-            if (level > (player['y'] - player['visibility']) and level < (player['y'] + player['visibility'])) and (width > (player['x'] - player['visibility']) and width < (player['x'] + player['visibility'])):
+    for level in range(len(fog)):
+        for width in range(len(fog[level])):
+            if (level >= (player['y'] - player['visibility']) and level <= (player['y'] + player['visibility'])) and (width >= (player['x'] - player['visibility']) and width <= (player['x'] + player['visibility'])):
                 fog[level][width] = ' '
-            continue
     return
 
 def initialize_game(game_map, fog, player):
@@ -76,12 +75,31 @@ def initialize_game(game_map, fog, player):
     
 # This function draws the entire map, covered by the fog
 def draw_map(game_map, fog, player):
-
-    return
+    map = ''
+    for x in range(len(game_map)):
+        for y in range(len(game_map[i])):
+            if x == player['x'] and y== player['y']:
+                layer += 'M'
+            elif x == 0 and y == 0:
+                layer += 'T'
+            elif fog[x][y] == ' ':
+                layer += game_map[x][y]
+            else:
+                map += '?'
+        map += '\n'
+    return map
 
 # This function draws the 3x3 viewport
 def draw_view(game_map, fog, player):
-    return
+    viewport = ''
+    for x in range((0 - player['visibility']), (player['visibility'])):
+        for y in range((0 - player['visibility']), (player['visibility'])):
+            if x == player['x'] and y == player['y']:
+                viewport += 'M'
+            else:
+                viewport += game_map[x][y]
+        viewport += '\n'
+    return viewport
 
 # This function shows the information for the player
 def show_information(player):
