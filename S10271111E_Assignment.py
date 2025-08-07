@@ -55,7 +55,10 @@ def initialize_game(game_map, fog, player):
     # TODO: initialize fog
     fog.clear()
     for i in range(MAP_HEIGHT):
-        fog.append('?' * MAP_WIDTH)
+        fog_layer = []
+        for j in range(MAP_WIDTH):
+            fog_layer.append('?')
+        fog.append(fog_layer)
 
     # TODO: initialize player
     #   You will probably add other entries into the player dictionary
