@@ -5,7 +5,7 @@ player = {}
 game_map = []
 fog = []
 width_counter = 0
-
+current_load = 0
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
 
@@ -21,6 +21,12 @@ prices['copper'] = (1, 3)
 prices['silver'] = (5, 8)
 prices['gold'] = (10, 18)
 
+def show_information(player):
+    print('----- Player Information -----\nName: {}\nCurrent Position: ({},{})\nPickaxe Level: {}\nGold: {}\nSilver: {}\nCopper: {}\n------------------------------\n\
+          Load: {}/{}\n------------------------------\nGP: {}\nSteps Taken: {}\n------------------------------'.format(\
+              player['name'],player['x'], player['y'], player['pickaxe level'], player['gold'], player['silver'], player['copper'],\
+                 current_load, player['load'], player['GP'], player['steps']))
+    return #TODO add day info
 # This function loads a map structure (a nested list) from a file
 # It also updates MAP_WIDTH and MAP_HEIGHT
 def load_map(filename, map_struct):
@@ -64,6 +70,7 @@ def initialize_game(game_map, fog, player):
     #   You will probably add other entries into the player dictionary
     player['x'] = 0
     player['y'] = 0
+    player['name'] = ''
     player['copper'] = 0
     player['silver'] = 0
     player['gold'] = 0
@@ -73,6 +80,7 @@ def initialize_game(game_map, fog, player):
     player['turns'] = TURNS_PER_DAY
     player['visibility'] = 1
     player['pickaxe level'] = 0
+    player['load'] = 10
 
     clear_fog(fog, player)
     
@@ -135,10 +143,4 @@ def load_game(game_map, fog, player):
     return
 
 initialize_game(game_map, fog, player)
-player['x'] = 7
-player['y'] = 9
-clear_fog(fog, player)
-save_game(game_map,fog,player)
-initialize_game(game_map, fog, player)
-load_game(game_map,fog,player)
-print(draw_view(game_map, fog, player))
+print(show_information(player))

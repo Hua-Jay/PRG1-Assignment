@@ -5,6 +5,7 @@ player = {}
 game_map = []
 fog = []
 width_counter = 0
+current_load = 0
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -74,6 +75,7 @@ def initialize_game(game_map, fog, player):
     player['turns'] = TURNS_PER_DAY
     player['visibility'] = 1
     player['pickaxe level'] = 0
+    player['load'] = 10
 
     clear_fog(fog, player)
     
@@ -116,7 +118,11 @@ def draw_view(game_map, fog, player):
 
 # This function shows the information for the player
 def show_information(player):
-    return
+    print('----- Player Information -----\nName: {}\nCurrent Position: ({},{})\nPickaxe Level: {}\nGold: {}\nSilver: {}\nCopper: {}\n------------------------------\n\
+          Load: {}/{}\n------------------------------\nGP: {}\nSteps Taken: {}\n------------------------------'.format(\
+              player['name'],player['x'], player['y'], player['pickaxe level'], player['gold'], player['silver'], player['copper'],\
+                 current_load, player['load'], player['GP'], player['steps']))
+    return #TODO add day info
 
 # This function saves the game
 def save_game(game_map, fog, player):
