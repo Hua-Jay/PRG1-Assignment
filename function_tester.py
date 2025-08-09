@@ -1,12 +1,10 @@
 #S10271111E Lee Hua Jay CSF03
-#here I test every function I am writing for the assignment
 from random import randint
 
 player = {}
 game_map = []
 fog = []
-width_counter = 0
-current_load = 0
+
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
 
@@ -22,12 +20,6 @@ prices['copper'] = (1, 3)
 prices['silver'] = (5, 8)
 prices['gold'] = (10, 18)
 
-def show_information(player):
-    print('----- Player Information -----\nName: {}\nCurrent Position: ({},{})\nPickaxe Level: {}\nGold: {}\nSilver: {}\nCopper: {}\n------------------------------\n\
-          Load: {}/{}\n------------------------------\nGP: {}\nSteps Taken: {}\n------------------------------'.format(\
-              player['name'],player['x'], player['y'], player['pickaxe level'], player['gold'], player['silver'], player['copper'],\
-                 current_load, player['load'], player['GP'], player['steps']))
-    return #TODO add day info
 # This function loads a map structure (a nested list) from a file
 # It also updates MAP_WIDTH and MAP_HEIGHT
 def load_map(filename, map_struct):
@@ -71,7 +63,7 @@ def initialize_game(game_map, fog, player):
     #   You will probably add other entries into the player dictionary
     player['x'] = 0
     player['y'] = 0
-    player['name'] = 'tes'
+    player['name'] = ''
     player['copper'] = 0
     player['silver'] = 0
     player['gold'] = 0
@@ -81,7 +73,9 @@ def initialize_game(game_map, fog, player):
     player['turns'] = TURNS_PER_DAY
     player['visibility'] = 1
     player['pickaxe level'] = 0
-    player['load'] = 10
+    player['max load'] = 10
+    player['current_load'] = 0
+    player['high_scores'] = []
 
     clear_fog(fog, player)
     
@@ -100,61 +94,41 @@ def draw_map(game_map, fog, player):
             else:
                 map += '?'
         map += '|\n'
-    map += '+' + '-'*len(game_map[0]) + '+\n'
+    map += '+' + '-'*len(game_map[0]) + '+'
     return map
 
+# This function draws the 3x3 viewport
 def draw_view(game_map, fog, player):
     viewport = '+' + '-'*(player['visibility']*2 + 1) + '+\n'
     for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
-        if x < 0:
-            continue
+        viewport += '|'
+        if x < 0 or x > 10:
+            viewport += '###'
         else:
-            viewport += '|'
             for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
                 if x == player['x'] and y == player['y']:
                     viewport += 'M'
-                elif y < 0:
-                    continue
+                elif y < 0 or y > 30:
+                    viewport += '#'
                 else:
                     viewport += game_map[x][y]
-            viewport += '|\n'
+        viewport += '|\n'
     viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
 
+# This function shows the information for the player
+def show_information(player):
+    print('----- Player Information -----\nName: {}\nCurrent Position: ({},{})\nPickaxe Level: {}\nGold: {}\nSilver: {}\nCopper: {}\n------------------------------\n\
+          Load: {}/{}\n------------------------------\nGP: {}\nSteps Taken: {}\n------------------------------'.format(\
+              player['name'],player['x'], player['y'], player['pickaxe level'], player['gold'], player['silver'], player['copper'],\
+                 player['current_load'], player['load'], player['GP'], player['steps']))
+    return #TODO add day info
 
-
-def valid_input(valids, user_input): #function for validity checking
-    while user_input not in valids: #loops if input isn't in list of valid inputs
-        user_input = input('Invalid input. Please enter a valid key: ')
-    return user_input
-initialize_game(game_map, fog, player)
-
-def show_high_scores(high_scores):
-    print()
-    print('------------- High Scores -------------')
-    for placing in range(5):
-        print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[placing][0], high_scores[placing][1], high_scores[placing][2]))
-    print('---------------------------------------')
-
-def update_scores(player, high_scores):
-    formatted_score = [player['name'], player['day'], player['steps'], player['GP']]
-    if len(high_scores) == 0: #checks if 
-        high_scores.append(formatted_score)
-    else:
-        for placing in range(len(high_scores)):
-            for tiebreak in range(1, 4):
-                if formatted_score[tiebreak] < (high_scores[placing])[tiebreak]:
-                    break
-                elif formatted_score[tiebreak] > (high_scores[placing])[tiebreak]:
-                    high_scores.insert(placing, formatted_score)
-                    if len(high_scores) > 5:
-                        high_scores.pop()
-                    return
-        if len(high_scores) < 5:
-            high_scores.append(formatted_score)
+# This function saves the game
 def save_game(game_map, fog, player):
     gamedata = [game_map, fog]
     file = open('SaveFile.txt', "w")
+    #save game_map and fog
     for type in range(2):
         for row in gamedata[type]:
             line = ''
@@ -163,12 +137,14 @@ def save_game(game_map, fog, player):
                 if i < (len(row) - 1):
                     line += ","
             file.write(line + "\n")
-        file.write('===\n')
+        file.write('===\n')#add seperator
+    #save player
     for key in player:
         file.write(str(key) + ":" + str(player[key]) + "\n")
     file.close()
     return 'Game saved.'
-
+        
+# This function loads the game
 def load_game(game_map, fog, player):
     loaded_data = []
 
@@ -197,8 +173,63 @@ def load_game(game_map, fog, player):
                 value = int(value)
             player[key] = value
     return
-player['name'] = 'tester'
-save_game(game_map,fog,player)
+
+def show_main_menu():
+    print()
+    print("--- Main Menu ----")
+    print("(N)ew game")
+    print("(L)oad saved game")
+#    print("(H)igh scores")
+    print("(Q)uit")
+    print("------------------")
+
+#this function opens the town menu
+def show_town_menu(player):
+    print()
+    # TODO: Show Day
+    print("----- Sundrop Town -----")
+    print("(B)uy stuff")
+    print("See Player (I)nformation")
+    print("See Mine (M)ap")
+    print("(E)nter mine")
+    print("Sa(V)e game")
+    print("(Q)uit to main menu")
+    print("------------------------")
+
+#this function opens the shop menu
+def show_shop_menu(player):
+    print()
+            
+#this function updates the high score list at the end of every playthrough
+def show_high_scores(high_scores):
+    print()
+    print('------------- High Scores -------------')
+    for placing in range(5):
+        print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[placing][0], high_scores[placing][1], high_scores[placing][2]))
+    print('---------------------------------------')
+
+#to be used at end of each win
+def update_scores(player, high_scores):
+    formatted_score = [player['name'], player['day'], player['steps'], player['GP']]
+    if len(high_scores) == 0: #checks if 
+        high_scores.append(formatted_score)
+    else:
+        for placing in range(len(high_scores)):
+            for tiebreak in range(1, 4):
+                if formatted_score[tiebreak] < (high_scores[placing])[tiebreak]:
+                    break
+                elif formatted_score[tiebreak] > (high_scores[placing])[tiebreak]:
+                    high_scores.insert(placing, formatted_score)
+                    if len(high_scores) > 5:
+                        high_scores.pop()
+                    return
+        if len(high_scores) < 5:
+            high_scores.append(formatted_score)
+                
+def valid_input(valids, user_input): #function for validity checking
+    while user_input not in valids: #loops if input isn't in list of valid inputs
+        user_input = input('Invalid input. Please enter a valid key: ')
+    return user_input
+
 initialize_game(game_map, fog, player)
-load_game(game_map, fog, player)
-print(player)
+print(draw_view(game_map, fog, player))

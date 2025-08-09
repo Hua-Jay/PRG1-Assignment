@@ -97,22 +97,22 @@ def draw_map(game_map, fog, player):
     map += '+' + '-'*len(game_map[0]) + '+'
     return map
 
-# This function draws the 3x3 viewport
+# This function draws the 3x3 viewport, changed to 5x5 if torch is bought (visibility will +1)
 def draw_view(game_map, fog, player):
     viewport = '+' + '-'*(player['visibility']*2 + 1) + '+\n'
     for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
-        if x < 0:
-            continue
+        viewport += '|'
+        if x < 0 or x > 10:
+            viewport += '###'
         else:
-            viewport += '|'
             for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
                 if x == player['x'] and y == player['y']:
                     viewport += 'M'
-                elif y < 0:
-                    continue
+                elif y < 0 or y > 30:
+                    viewport += '#'
                 else:
                     viewport += game_map[x][y]
-            viewport += '|\n'
+        viewport += '|\n'
     viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
 
