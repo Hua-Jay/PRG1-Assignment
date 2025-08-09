@@ -168,6 +168,10 @@ def show_town_menu():
     print("(Q)uit to main menu")
     print("------------------------")
             
+def valid_input(valids, user_input): #function for validity checking
+    while user_input not in valids: #loops if input isn't in list of valid inputs
+        user_input = input('Invalid input. Please enter a valid key: ')
+    return user_input
 
 #--------------------------- MAIN GAME ---------------------------
 game_state = 'main'

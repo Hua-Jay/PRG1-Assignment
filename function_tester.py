@@ -1,4 +1,5 @@
 #S10271111E Lee Hua Jay CSF03
+#here I test every function I am writing for the assignment
 from random import randint
 
 player = {}
@@ -142,5 +143,12 @@ def load_game(game_map, fog, player):
     player = SAVED_PLAYER
     return
 
+def valid_input(valids, user_input): #function for validity checking
+    while user_input not in valids: #loops if input isn't in list of valid inputs
+        user_input = input('Invalid input. Please enter a valid key: ')
+    return user_input
 initialize_game(game_map, fog, player)
-print(show_information(player))
+
+test = input('enter a, b, or c: ')
+valid = ['a','b','c']
+print(valid_input(valid,test))
