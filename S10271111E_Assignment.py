@@ -178,9 +178,10 @@ def show_high_scores(high_scores):
     print()
     print('------------- High Scores -------------')
     for placing in range(5):
-        print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[players][0], high_scores[players][1], high_scores[players][2]))
+        print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[placing][0], high_scores[placing][1], high_scores[placing][2]))
     print('---------------------------------------')
 
+#to be used at end of each win
 def update_scores(player, high_scores):
     formatted_score = [player['name'], player['day'], player['steps'], player['GP']]
     if len(high_scores) == 0: #checks if 
