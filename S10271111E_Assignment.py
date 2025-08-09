@@ -4,8 +4,6 @@ from random import randint
 player = {}
 game_map = []
 fog = []
-current_load = 0
-high_scores = []
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -76,6 +74,8 @@ def initialize_game(game_map, fog, player):
     player['visibility'] = 1
     player['pickaxe level'] = 0
     player['max load'] = 10
+    player['current_load'] = 0
+    player['high_scores'] = []
 
     clear_fog(fog, player)
     
@@ -121,30 +121,57 @@ def show_information(player):
     print('----- Player Information -----\nName: {}\nCurrent Position: ({},{})\nPickaxe Level: {}\nGold: {}\nSilver: {}\nCopper: {}\n------------------------------\n\
           Load: {}/{}\n------------------------------\nGP: {}\nSteps Taken: {}\n------------------------------'.format(\
               player['name'],player['x'], player['y'], player['pickaxe level'], player['gold'], player['silver'], player['copper'],\
-                 current_load, player['load'], player['GP'], player['steps']))
+                 player['current_load'], player['load'], player['GP'], player['steps']))
     return #TODO add day info
 
 # This function saves the game
 def save_game(game_map, fog, player):
-    global SAVED_MAP
-    global SAVED_FOG
-    global SAVED_PLAYER
-    # save map
-    SAVED_MAP = game_map
-    # save fog
-    SAVED_FOG = fog
-    # save player
-    SAVED_PLAYER = player
-    return
+    gamedata = [game_map, fog]
+    file = open('SaveFile.txt', "w")
+    #save game_map and fog
+    for type in range(2):
+        for row in gamedata[type]:
+            line = ''
+            for i in range(len(row)):
+                line += str(row[i])
+                if i < (len(row) - 1):
+                    line += ","
+            file.write(line + "\n")
+        file.write('===\n')#add seperator
+    #save player
+    for key in player:
+        file.write(str(key) + ":" + str(player[key]) + "\n")
+    file.close()
+    return 'Game saved.'
         
 # This function loads the game
 def load_game(game_map, fog, player):
-    # load map
-    game_map = SAVED_MAP
-    # load fog
-    fog = SAVED_FOG
-    # load player
-    player = SAVED_PLAYER
+    loaded_data = []
+
+    #remove previous data
+    game_map.clear()
+    fog.clear()
+    player.clear()
+    #read save file
+    file = open('SaveFile.txt', "r")
+    dataread = file.read().split('\n===\n')#splits with seperator
+    file.close()
+    #save game_map and fog
+    for i in range(2):
+        new_data = []
+        for data in dataread[i].split('\n'):
+            new_data.append(data)
+        loaded_data.append(new_data)
+    game_map = loaded_data[0]
+    fog = loaded_data[1]
+    #save player
+    for line in dataread[2].strip().split('\n'):
+        if '=' in line:
+            key, value = line.split('=')
+    #convert numbers to int
+            if value.isdigit():
+                value = int(value)
+            player[key] = value
     return
 
 def show_main_menu():

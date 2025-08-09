@@ -71,7 +71,7 @@ def initialize_game(game_map, fog, player):
     #   You will probably add other entries into the player dictionary
     player['x'] = 0
     player['y'] = 0
-    player['name'] = 'test'
+    player['name'] = 'tes'
     player['copper'] = 0
     player['silver'] = 0
     player['gold'] = 0
@@ -121,27 +121,7 @@ def draw_view(game_map, fog, player):
     viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
 
-def save_game(game_map, fog, player):
-    global SAVED_MAP
-    global SAVED_FOG
-    global SAVED_PLAYER
-    # save map
-    SAVED_MAP = game_map
-    # save fog
-    SAVED_FOG = fog
-    # save player
-    SAVED_PLAYER = player
-    return
-        
-# This function loads the game
-def load_game(game_map, fog, player):
-    # load map
-    game_map = SAVED_MAP
-    # load fog
-    fog = SAVED_FOG
-    # load player
-    player = SAVED_PLAYER
-    return
+
 
 def valid_input(valids, user_input): #function for validity checking
     while user_input not in valids: #loops if input isn't in list of valid inputs
@@ -172,8 +152,53 @@ def update_scores(player, high_scores):
                     return
         if len(high_scores) < 5:
             high_scores.append(formatted_score)
+def save_game(game_map, fog, player):
+    gamedata = [game_map, fog]
+    file = open('SaveFile.txt', "w")
+    for type in range(2):
+        for row in gamedata[type]:
+            line = ''
+            for i in range(len(row)):
+                line += str(row[i])
+                if i < (len(row) - 1):
+                    line += ","
+            file.write(line + "\n")
+        file.write('===\n')
+    for key in player:
+        file.write(str(key) + ":" + str(player[key]) + "\n")
+    file.close()
+    return 'Game saved.'
 
-high_scores = [['K',3, 2, 55], ["Bob", 3, 11000, 12], ["Charlie", 2, 13000, 14], ["Dana", 2, 12500, 13], ]
+def load_game(game_map, fog, player):
+    loaded_data = []
 
-update_scores(player, high_scores)
-show_high_scores(high_scores)
+    #remove previous data
+    game_map.clear()
+    fog.clear()
+    player.clear()
+    #read save file
+    file = open('SaveFile.txt', "r")
+    dataread = file.read().split('\n===\n')#splits with seperator
+    file.close()
+    #save game_map and fog
+    for i in range(2):
+        new_data = []
+        for data in dataread[i].split('\n'):
+            new_data.append(data)
+        loaded_data.append(new_data)
+    game_map = loaded_data[0]
+    fog = loaded_data[1]
+    #save player
+    for line in dataread[2].strip().split('\n'):
+        if ':' in line:
+            key, value = line.split(':')
+    #convert numbers to int
+            if value.isdigit():
+                value = int(value)
+            player[key] = value
+    return
+player['name'] = 'tester'
+save_game(game_map,fog,player)
+initialize_game(game_map, fog, player)
+load_game(game_map, fog, player)
+print(player)
