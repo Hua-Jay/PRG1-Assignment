@@ -166,8 +166,8 @@ def load_game(game_map, fog, player):
     fog = loaded_data[1]
     #save player
     for line in dataread[2].strip().split('\n'):
-        if '=' in line:
-            key, value = line.split('=')
+        if ':' in line:
+            key, value = line.split(':')
     #convert numbers to int
             if value.isdigit():
                 value = int(value)
