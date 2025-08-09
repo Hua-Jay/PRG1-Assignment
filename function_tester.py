@@ -71,7 +71,7 @@ def initialize_game(game_map, fog, player):
     #   You will probably add other entries into the player dictionary
     player['x'] = 0
     player['y'] = 0
-    player['name'] = ''
+    player['name'] = 'test'
     player['copper'] = 0
     player['silver'] = 0
     player['gold'] = 0
@@ -149,6 +149,31 @@ def valid_input(valids, user_input): #function for validity checking
     return user_input
 initialize_game(game_map, fog, player)
 
-test = input('enter a, b, or c: ')
-valid = ['a','b','c']
-print(valid_input(valid,test))
+def show_high_scores(high_scores):
+    print()
+    print('------------- High Scores -------------')
+    for placing in range(5):
+        print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[players][0], high_scores[players][1], high_scores[players][2]))
+    print('---------------------------------------')
+
+def update_scores(player, high_scores):
+    formatted_score = [player['name'], player['day'], player['steps'], player['GP']]
+    if len(high_scores) == 0: #checks if 
+        high_scores.append(formatted_score)
+    else:
+        for placing in range(len(high_scores)):
+            for tiebreak in range(1, 4):
+                if formatted_score[tiebreak] < (high_scores[placing])[tiebreak]:
+                    break
+                elif formatted_score[tiebreak] > (high_scores[placing])[tiebreak]:
+                    high_scores.insert(placing, formatted_score)
+                    if len(high_scores) > 5:
+                        high_scores.pop()
+                    return
+        if len(high_scores) < 5:
+            high_scores.append(formatted_score)
+
+high_scores = [['K',3, 2, 55], ["Bob", 3, 11000, 12], ["Charlie", 2, 13000, 14], ["Dana", 2, 12500, 13], ]
+
+update_scores(player, high_scores)
+show_high_scores(high_scores)

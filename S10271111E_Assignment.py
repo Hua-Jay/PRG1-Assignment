@@ -4,8 +4,8 @@ from random import randint
 player = {}
 game_map = []
 fog = []
-width_counter = 0
 current_load = 0
+high_scores = []
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -75,7 +75,7 @@ def initialize_game(game_map, fog, player):
     player['turns'] = TURNS_PER_DAY
     player['visibility'] = 1
     player['pickaxe level'] = 0
-    player['load'] = 10
+    player['max load'] = 10
 
     clear_fog(fog, player)
     
@@ -156,7 +156,8 @@ def show_main_menu():
     print("(Q)uit")
     print("------------------")
 
-def show_town_menu():
+#this function opens the town menu
+def show_town_menu(player):
     print()
     # TODO: Show Day
     print("----- Sundrop Town -----")
@@ -167,7 +168,36 @@ def show_town_menu():
     print("Sa(V)e game")
     print("(Q)uit to main menu")
     print("------------------------")
+
+#this function opens the shop menu
+def show_shop_menu(player):
+    print()
             
+#this function updates the high score list at the end of every playthrough
+def show_high_scores(high_scores):
+    print()
+    print('------------- High Scores -------------')
+    for placing in range(5):
+        print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[players][0], high_scores[players][1], high_scores[players][2]))
+    print('---------------------------------------')
+
+def update_scores(player, high_scores):
+    formatted_score = [player['name'], player['day'], player['steps'], player['GP']]
+    if len(high_scores) == 0: #checks if 
+        high_scores.append(formatted_score)
+    else:
+        for placing in range(len(high_scores)):
+            for tiebreak in range(1, 4):
+                if formatted_score[tiebreak] < (high_scores[placing])[tiebreak]:
+                    break
+                elif formatted_score[tiebreak] > (high_scores[placing])[tiebreak]:
+                    high_scores.insert(placing, formatted_score)
+                    if len(high_scores) > 5:
+                        high_scores.pop()
+                    return
+        if len(high_scores) < 5:
+            high_scores.append(formatted_score)
+                
 def valid_input(valids, user_input): #function for validity checking
     while user_input not in valids: #loops if input isn't in list of valid inputs
         user_input = input('Invalid input. Please enter a valid key: ')
