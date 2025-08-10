@@ -16,6 +16,7 @@ ore = ['copper','silver','gold']
 valid_mainmenu = ['N', 'L', 'H', 'Q']
 valid_townmenu = ['B', 'I', 'M', 'E', 'V', 'Q']
 valid_warehouse = ['C', 'S', 'G', 'L']
+valid_mining = ['W', 'A', 'S', 'D', 'M', 'I', 'P', 'Q']
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -81,12 +82,13 @@ def initialize_game(game_map, fog, player):
     player['GP'] = 0
     player['day'] = 0
     player['steps'] = 0
-    player['turns'] = TURNS_PER_DAY
+    player['turns'] = 0
     player['visibility'] = 1
     player['pickaxe_level'] = 1
     player['max_load'] = 10
     player['current_load'] = 0
     player['state'] = 'main'
+    player['portaled'] = False
     name = input('Greetings, miner! What is your name? ')
     while name == '\n===\n':
         name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
@@ -102,10 +104,16 @@ def draw_map(game_map, fog, player):
         map += '|'
         for y in range(len(game_map[x])):
             if x == player['x'] and y== player['y']:
-                map += 'M'
+                if player['portaled'] == False and player['state'] == 'mines':
+                    map += 'M'
+                else:
+                    map += 'P'
             elif x == 0 and y == 0:
-                map += 'T'
-            elif fog[x][y] == ' ':
+                if player['state'] == 'town':
+                    map += 'M'
+                else:
+                    map += 'T'
+            elif fog[y][x] == ' ':
                 map += game_map[x][y]
             else:
                 map += '?'
@@ -176,7 +184,7 @@ def load_game(game_map, fog, player):
         print('Save file empty. Game will be initialized instead')
         initialize_game(game_map, fog, player)
         return
-    if dataread == ['']:
+    if dataread == []:
         print('Save file empty. Game will be initialized instead')
         initialize_game(game_map, fog, player)
         return
@@ -402,3 +410,10 @@ while player['GP'] < 500:
                 show_information(player)
             show_town_menu(player)
             choice = input('Your choice? ').upper()
+    player['state'] = 'mines'
+    player['town'] = False
+    if player['state'] == 'mines':
+        print('---------------------------------------------------')
+        print('{:^51}'.format('Day ' + str(player['day'])))
+        print('---------------------------------------------------')
+    

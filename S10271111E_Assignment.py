@@ -16,6 +16,7 @@ ore = ['copper','silver','gold']
 valid_mainmenu = ['N', 'L', 'H', 'Q']
 valid_townmenu = ['B', 'I', 'M', 'E', 'V', 'Q']
 valid_warehouse = ['C', 'S', 'G', 'L']
+valid_mining = ['W', 'A', 'S', 'D', 'M', 'I', 'P', 'Q']
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -81,12 +82,13 @@ def initialize_game(game_map, fog, player):
     player['GP'] = 0
     player['day'] = 0
     player['steps'] = 0
-    player['turns'] = TURNS_PER_DAY
+    player['turns_left'] = 20
     player['visibility'] = 1
     player['pickaxe_level'] = 1
     player['max_load'] = 10
     player['current_load'] = 0
     player['state'] = 'main'
+    player['town'] = True
     name = input('Greetings, miner! What is your name? ')
     while name == '\n===\n':
         name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
@@ -101,10 +103,13 @@ def draw_map(game_map, fog, player):
     for x in range(len(game_map)):
         map += '|'
         for y in range(len(game_map[x])):
-            if x == player['x'] and y== player['y']:
+            if x == player['x'] and y== player['y'] and player['town'] == False:
                 map += 'M'
             elif x == 0 and y == 0:
-                map += 'T'
+                if player['town'] == False:
+                    map += 'T'
+                else:
+                    map += 'M'
             elif fog[x][y] == ' ':
                 map += game_map[x][y]
             else:
@@ -118,13 +123,13 @@ def draw_view(game_map, fog, player):
     viewport = '+' + '-'*(player['visibility']*2 + 1) + '+\n'
     for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
         viewport += '|'
-        if y < 0 or y > MAP_HEIGHT:
+        if y < 0 or y > (MAP_HEIGHT - 1):
             viewport += '#' * ((2 * player['visibility']) + 1)
         else:
             for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
                 if x == player['x'] and y == player['y']:
                     viewport += 'M'
-                elif x < 0 or x > MAP_WIDTH:
+                elif x < 0 or x > (MAP_WIDTH - 1):
                     viewport += '#'
                 else:
                     viewport += game_map[y][x]
@@ -345,30 +350,140 @@ def warehouse_options(player):
         if choice == 'C':
             if player['copper'] > 0:
                 player['GP'] += copper_price * player['copper']
-                print('\nYou have sold {} copper for {} GP!'.format(player['copper'], (copper_price * player['copper'])))
+                print('\nYou sell {} copper for {} GP. You now have {} GP!'.format(player['copper'], (copper_price * player['copper']), player['GP']))
                 player['copper'] = 0
             else:
                 print('\nYou have 0 copper to sell. Find more in the mines!')
         elif choice == 'S':
             if player['Silver'] > 0:
                 player['GP'] += silver_price * player['silver']
-                print('\nYou have sold {} silver for {} GP!'.format(player['silver'], (silver_price * player['silver'])))
+                print('\nYou sell {} silver for {} GP. You now have {} GP!'.format(player['silver'], (silver_price * player['silver']), player['GP']))
                 player['silver'] = 0
             else:
                 print('\nYou have 0 silver to sell. Find more in the mines!')
         elif choice == 'G':
             if player['gold'] > 0:
                 player['GP'] += gold_price * player['gold']
-                print('\nYou have sold {} gold for {} GP!'.format(player['gold'], (gold_price * player['gold'])))
+                print('\nYou sell {} gold for {} GP. You now have {} GP!'.format(player['gold'], (gold_price * player['gold']), player['GP']))
                 player['gold'] = 0
             else:
                 print('\nYou have 0 gold to sell. Find more in the mines!')
         show_warehouse(player)
         choice = input('Your choice? ').upper()
         choice = valid_input(valid_warehouse, choice)
+    
+#this function displays the mine
+def show_mine(player):
+    print('DAY {}'.format(player['day']))
+    print(draw_view(game_map, fog, player))
+    print('Turns Left: {}   Load: {} / {}   Steps: {}'.format(player['turns_left'], player['current_load'], player['max_load'], player['steps']))
+    print('(WASD) to move')
+    print('(M)ap, (I)nformation, (P)ortal, (Q)uit to main menu')
+
+#this function attempts to mine an ore
+def attempt_mine(position, player):
+    mined_ore = ''
+    if position == 'C':
+        mined_ore = 'copper'
+        mined = randint(1, 5)
+    elif position == 'S':
+        if player['pickaxe_level'] > 1:
+            mined_ore = 'silver'
+            mined = randint(1, 3)
+        else:
+            print('Your pickaxe is not good enough to mine silver.')
+            return False
+    elif position == 'G':
+        if player['pickaxe_level'] > 2:
+            mined_ore = 'gold'
+            mined = randint(1, 2)
+        else:
+            print('Your pickaxe is not good enough to mine silver.')
+            return False
+    else:
+        return True
+    print('You mined {} piece(s) of {}.'.format(mined, mined_ore))
+    addable_load = player['max_load'] - player['current_load']
+    if addable_load > mined:
+        player[mined_ore] += mined
+    else:
+        player[mined_ore] += addable_load
+        print('... but you can only carry {} more piece(s)!'.format(addable_load))
+    position = ' '
+    return True
+
+#this function responds to possible player actions in the mine
+def mine_actions(game_map, player):
+    show_mine(player)
+    action = input('Action? ').upper()
+    valid_input(valid_mining, action)
+    while player['turns_left'] != 0:
+        if action == 'M':
+            print(draw_map(game_map, fog, player))
+
+        elif action == 'I':
+
+            show_information(player)
+        elif action == 'Q':
+            menu_options()
+
+        elif action == 'P':
+            break
+
+        else: #for movements
+            if action == 'W':
+                if player['y'] != (0):
+                    player['y'] += 1
+                    if game_map[player['x']] [player['y']] != ' ':
+                        attempt_mine[game_map[player['x']] [player['y']]]
+                        if attempt_mine[game_map[player['x']] [player['y']], player] == False:
+                            player['y'] -= 1
+                else:
+                    print('You bump your head against the mine\'s walls.')
+
+            elif action == 'S':
+                if player['y'] != (0):
+                    player['y'] -= 1
+                    if game_map[player['x']] [player['y']] != ' ':
+                        attempt_mine[game_map[player['x']] [player['y']]]
+                        if attempt_mine[game_map[player['x']] [player['y']], player] == False:
+                            player['y'] += 1
+                else:
+                    print('You bump your head against the mine\'s walls.')
+
+            elif action == 'A':
+                if player['x'] != 0:
+                    player['x'] -= 1
+                    if game_map[player['x']] [player['y']] != ' ':
+                        attempt_mine[game_map[player['x']] [player['y']]]
+                        if attempt_mine[game_map[player['x']] [player['y']], player] == False:
+                            player['x'] += 1
+                else:
+                    print('You bump your head against the mine\'s walls.')
+            else:
+                if player['x'] != 0:
+                    player['x'] += 1
+                    if game_map[player['x']] [player['y']] != ' ':
+                        attempt_mine[game_map[player['x']] [player['y']]]
+                        if attempt_mine[game_map[player['x']] [player['y']], player] == False:
+                            player['x'] -= 1
+                else:
+                    print('You bump your head against the mine\'s walls.')
+            player['steps'] += 1
+            player['turns_left'] -= 1
+        show_mine(player)
+        action = input('Action? ')
+        valid_input(valid_mining, action)
+    if player['turns_left'] == 0:
+        print('You are exhausted.')
+        player['turns_left'] = 0
+    print('You place your portal stone here and zap back to town.')
+    player['state'] = 'main'
+    if player['portal'] == False:
+        player['portal'] = True
+
 
 #--------------------------- MAIN GAME ---------------------------
-player['state'] = 'main'
 print("---------------- Welcome to Sundrop Caves! ----------------")
 print("You spent all your money to get the deed to a mine, a small")
 print("  backpack, a simple pickaxe and a magical portal stone.")
@@ -404,4 +519,10 @@ while player['GP'] < 500:
             show_town_menu(player)
             choice = input('Your choice? ').upper()
     player['state'] = 'mines'
-    
+    player['town'] = False
+    player['turns_left'] = 20
+    if player['state'] == 'mines':
+        print('---------------------------------------------------')
+        print('{:^51}'.format('DAY ' + str(player['day'])))
+        print('---------------------------------------------------')
+        mine_actions(game_map, player)
