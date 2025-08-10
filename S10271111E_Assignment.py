@@ -360,7 +360,7 @@ def warehouse_options(player):
     while choice != 'L':
         if choice == 'C':
             if player['copper'] > 0:
-                player['GP'] += 5000
+                player['GP'] += copper_price * player['copper']
                 print('\nYou sell {} copper for {} GP. You now have {} GP!'.format(player['copper'], (copper_price * player['copper']), player['GP']))
                 player['copper'] = 0
             else:
