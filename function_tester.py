@@ -88,7 +88,7 @@ def initialize_game(game_map, fog, player):
     while name == '\n===\n':
         name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
     player['name'] = name
-    print('Pleased to meet you, {}. Welcome to Sundrop Town!')
+    print('Pleased to meet you, {}. Welcome to Sundrop Town!'.format(name))
     
     clear_fog(fog, player)
     
@@ -113,21 +113,22 @@ def draw_map(game_map, fog, player):
 # This function draws the 3x3 viewport, changed to 5x5 if torch is bought (visibility will +1)
 def draw_view(game_map, fog, player):
     viewport = '+' + '-'*(player['visibility']*2 + 1) + '+\n'
-    for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
+    for y in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
         viewport += '|'
-        if x < 0 or x > 10:
+        if y < 0 or y > MAP_HEIGHT:
             viewport += '#' * ((2 * player['visibility']) + 1)
         else:
-            for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
+            for x in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
                 if x == player['x'] and y == player['y']:
                     viewport += 'M'
-                elif y < 0 or y > 30:
+                elif x < 0 or x > MAP_WIDTH:
                     viewport += '#'
                 else:
-                    viewport += game_map[x][y]
+                    viewport += game_map[y][x]
         viewport += '|\n'
     viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
+
 
 # This function shows the information for the player
 def show_information(player):
@@ -291,7 +292,4 @@ def menu_options():
 
 # TODO: The game!
 menu_options()
-while player['GP'] < 500:
-    player['day'] += 1
-    show_town_menu(player)
-    
+print(draw_view(game_map, fog, player))

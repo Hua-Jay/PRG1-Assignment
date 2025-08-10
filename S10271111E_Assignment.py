@@ -14,6 +14,7 @@ fog = []
 
 #list of valid inputs for each menu, excluding valid_buys
 valid_mainmenu = ['N', 'L', 'H', 'Q']
+valid_townmenu = ['B', 'I', 'M', 'E', 'V', 'Q']
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -88,7 +89,7 @@ def initialize_game(game_map, fog, player):
     while name == '\n===\n':
         name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
     player['name'] = name
-    print('Pleased to meet you, {}. Welcome to Sundrop Town!')
+    print('Pleased to meet you, {}. Welcome to Sundrop Town!'.format(name))
 
     clear_fog(fog, player)
     
@@ -113,18 +114,18 @@ def draw_map(game_map, fog, player):
 # This function draws the 3x3 viewport, changed to 5x5 if torch is bought (visibility will +1)
 def draw_view(game_map, fog, player):
     viewport = '+' + '-'*(player['visibility']*2 + 1) + '+\n'
-    for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
+    for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
         viewport += '|'
-        if x < 0 or x > 10:
+        if y < 0 or y > MAP_HEIGHT:
             viewport += '#' * ((2 * player['visibility']) + 1)
         else:
-            for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
+            for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
                 if x == player['x'] and y == player['y']:
                     viewport += 'M'
-                elif y < 0 or y > 30:
+                elif x < 0 or x > MAP_WIDTH:
                     viewport += '#'
                 else:
-                    viewport += game_map[x][y]
+                    viewport += game_map[y][x]
         viewport += '|\n'
     viewport += '+' + '-'*(player['visibility']*2 + 1) + '+'
     return viewport
@@ -209,6 +210,7 @@ def show_town_menu(player):
     print("(B)uy stuff")
     print("See Player (I)nformation")
     print("See Mine (M)ap")
+    print('(A)ccess Warehouse')
     print("(E)nter mine")
     print("Sa(V)e game")
     print("(Q)uit to main menu")
@@ -216,6 +218,7 @@ def show_town_menu(player):
 
 #this function opens the shop menu
 def show_shop_menu(player):
+    global ore
     ore = ['','silver','gold']
     buyables = 0
     global valid_buys
@@ -225,7 +228,7 @@ def show_shop_menu(player):
     if player['pickaxe_level'] < 3:
         buyables += 1
         valid_buys.append('P')
-        print('(P)ickaxe upgrade to level {} to mine {} ore for 50 GP'.format(player['pickaxe_level'] + 1,ore[player['pickaxe_level']]))
+        print('(P)ickaxe upgrade to level {} to mine {} ore for {} GP'.format(player['pickaxe_level'] + 1,ore[player['pickaxe_level']], pickaxe_price[player['pickaxe_level'] - 1]))
     if player['max_load'] < 20: #max steps is 20 per day, so only 20 is needed 
         buyables += 1
         valid_buys.append('B')
@@ -240,7 +243,7 @@ def show_shop_menu(player):
     print('-----------------------------------------------------------')
     print('GP: {}'.format(player['GP']))
     print('-----------------------------------------------------------')
-    return
+
 #this function updates the high score list at the end of every playthrough
 def show_high_scores(high_scores):
     print()
@@ -273,7 +276,6 @@ def update_scores(player, high_scores):
 def valid_input(valids, user_input): #function for validity checking
     while user_input not in valids: #loops if input isn't in list of valid inputs
         user_input = input('Invalid input. Please enter a valid key: ')
-    return user_input
 
 def menu_options():
     show_main_menu()
@@ -288,13 +290,38 @@ def menu_options():
         menu_options()
     else:
         quit()
+
+def shop_options(player):
+    show_shop_menu(player)
+    choice = input('Your choice? ')
+    while choice != 'L':
+        valid_input(valid_buys, choice)
+        if choice == 'P':
+            if player['GP'] >= pickaxe_price[player['pickaxe_level'] - 1]:
+                player['GP'] -= pickaxe_price[player['pickaxe_level'] - 1]
+                player['pickaxe_level'] += 1
+                print('Congratulations! You can now mine {}!'.format(ore[player['pickaxe_level']]))
+        elif choice == 'B':
+            if player['GP'] >= (player['max_load'] * 2):
+                player['GP'] -= (player['max_load'] * 2)
+                player['max_load'] += 2
+                print('Congratulations! You can now carry {} items!'.format(player['max_load']))
+        elif choice == 'T':
+            if player['GP'] >= 50:
+                player['GP'] -= 50
+                player['visibility'] += 1
+                print('Congratulations! Your view range has increased to a 5x5 square!')
+        else:
+            print('Insufficient GP. Sell ores for more GP!')
+        show_shop_menu(player)
+
 #--------------------------- MAIN GAME ---------------------------
 game_state = 'main'
 print("---------------- Welcome to Sundrop Caves! ----------------")
 print("You spent all your money to get the deed to a mine, a small")
 print("  backpack, a simple pickaxe and a magical portal stone.")
 print()
-print("How quickly can you get the 1000 GP you need to retire")
+print("How quickly can you get the 500 GP you need to retire")
 print("  and live happily ever after?")
 print("-----------------------------------------------------------")
 
@@ -302,5 +329,14 @@ print("-----------------------------------------------------------")
 menu_options()
 while player['GP'] < 500:
     player['day'] += 1
-    show_town_menu(player)
-    
+    choice = ''
+    while choice != 'E':
+        if choice == 'Q':
+            quit()
+        if choice == 'B':
+            shop_options(player)
+        elif choice == 'M':
+            print(draw_map(game_map, fog, player))
+        
+        show_town_menu(player)
+        choice = input('Your choice? ').upper()
