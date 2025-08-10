@@ -147,7 +147,6 @@ def save_game(game_map, fog, player):
 # This function loads the game
 def load_game(game_map, fog, player):
     loaded_data = []
-
     #remove previous data
     game_map.clear()
     fog.clear()
@@ -156,6 +155,9 @@ def load_game(game_map, fog, player):
     file = open('SaveFile.txt', "r")
     dataread = file.read().split('\n===\n')#splits with seperator
     file.close()
+    #checks if SaveFile.txt is empty
+    if dataread == '':
+        return('Save file empty. Game will be initialized instead')
     #save game_map and fog
     for i in range(2):
         new_data = []
@@ -172,7 +174,7 @@ def load_game(game_map, fog, player):
             if value.isdigit():
                 value = int(value)
             player[key] = value
-    return
+    return 'Game Loaded.'
 
 def show_main_menu():
     print()
@@ -263,5 +265,7 @@ print("  and live happily ever after?")
 print("-----------------------------------------------------------")
 
 # TODO: The game!
+
+show_main_menu()
 
     
