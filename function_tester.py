@@ -1,9 +1,19 @@
 #S10271111E Lee Hua Jay CSF03
 from random import randint
+#shows high score list
+try:
+    scoresheet = open('sundropcaveshighscores.txt','r')
+    high_scores = scoresheet.read().split('\n')
+    scoresheet.close()
+except FileNotFoundError:
+    high_scores = []
 
 player = {}
 game_map = []
 fog = []
+
+#list of valid inputs for each menu, excluding valid_buys
+valid_mainmenu = ['N', 'L', 'H', 'Q']
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -63,7 +73,6 @@ def initialize_game(game_map, fog, player):
     #   You will probably add other entries into the player dictionary
     player['x'] = 0
     player['y'] = 0
-    player['name'] = ''
     player['copper'] = 0
     player['silver'] = 0
     player['gold'] = 0
@@ -75,8 +84,12 @@ def initialize_game(game_map, fog, player):
     player['pickaxe_level'] = 1
     player['max_load'] = 10
     player['current_load'] = 0
-    player['high_scores'] = []
-
+    name = input('Greetings, miner! What is your name? ')
+    while name == '\n===\n':
+        name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
+    player['name'] = name
+    print('Pleased to meet you, {}. Welcome to Sundrop Town!')
+    
     clear_fog(fog, player)
     
 # This function draws the entire map, covered by the fog
@@ -147,15 +160,19 @@ def save_game(game_map, fog, player):
 # This function loads the game
 def load_game(game_map, fog, player):
     loaded_data = []
-
     #remove previous data
     game_map.clear()
     fog.clear()
     player.clear()
     #read save file
-    file = open('SaveFile.txt', "r")
-    dataread = file.read().split('\n===\n')#splits with seperator
-    file.close()
+    try:
+        file = open('SaveFile.txt', "r")
+        dataread = file.read().split('\n===\n')#splits with seperator
+        file.close()
+    except FileNotFoundError:
+        print('Save file empty. Game will be initialized instead')
+        initialize_game(game_map, fog, player)
+        return
     #save game_map and fog
     for i in range(2):
         new_data = []
@@ -172,6 +189,7 @@ def load_game(game_map, fog, player):
             if value.isdigit():
                 value = int(value)
             player[key] = value
+    print('Game Loaded.')
     return
 
 def show_main_menu():
@@ -200,29 +218,38 @@ def show_town_menu(player):
 def show_shop_menu(player):
     ore = ['','silver','gold']
     buyables = 0
+    global valid_buys
+    valid_buys = ['L']
     print()
     print('----------------------- Shop Menu -------------------------')
     if player['pickaxe_level'] < 3:
         buyables += 1
+        valid_buys.append('P')
         print('(P)ickaxe upgrade to level {} to mine {} ore for 50 GP'.format(player['pickaxe_level'] + 1,ore[player['pickaxe_level']]))
     if player['max_load'] < 20: #max steps is 20 per day, so only 20 is needed 
         buyables += 1
+        valid_buys.append('B')
         print('(B)ackpack upgrade to carry {} items for {} GP'.format(player['max_load'] + 2, player['max_load'] * 2))
     if player['visibility'] == 1:
         buyables += 1
+        valid_buys.append('T')
         print('Magic (T)orch to increase visiblity to a 5x5 box for 50 GP')
     if buyables == 0:
         print('You currently have the best possible equipment!')
+    print('(L)eave shop')
     print('-----------------------------------------------------------')
     print('GP: {}'.format(player['GP']))
     print('-----------------------------------------------------------')
-            
+    return
 #this function updates the high score list at the end of every playthrough
 def show_high_scores(high_scores):
     print()
     print('------------- High Scores -------------')
-    for placing in range(5):
-        print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[placing][0], high_scores[placing][1], high_scores[placing][2]))
+    if len(high_scores) == 0:
+        print('The scoreboard is empty. Be here soon?')
+    else:
+        for placing in range(len(high_scores)):
+            print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[placing][0], high_scores[placing][1], high_scores[placing][2]))
     print('---------------------------------------')
 
 #to be used at end of each win
@@ -248,5 +275,23 @@ def valid_input(valids, user_input): #function for validity checking
         user_input = input('Invalid input. Please enter a valid key: ')
     return user_input
 
-initialize_game(game_map, fog, player)
-show_shop_menu(player)
+def menu_options():
+    show_main_menu()
+    choice = input('Your choice? ').upper()
+    valid_input(valid_mainmenu, choice)
+    if choice == 'N':
+        initialize_game(game_map, fog, player)
+    elif choice == 'L':
+        load_game(game_map, fog, player)
+    elif choice == 'H':
+        show_high_scores(high_scores)
+        menu_options()
+    else:
+        quit()
+
+# TODO: The game!
+menu_options()
+while player['GP'] < 500:
+    player['day'] += 1
+    show_town_menu(player)
+    
