@@ -103,7 +103,7 @@ def draw_view(game_map, fog, player):
     for x in range((player['x'] - player['visibility']), (player['x'] + player['visibility'] + 1)):
         viewport += '|'
         if x < 0 or x > 10:
-            viewport += '###'
+            viewport += '#' * ((2 * player['visibility']) + 1)
         else:
             for y in range((player['y'] - player['visibility']), (player['y'] + player['visibility'] + 1)):
                 if x == player['x'] and y == player['y']:
