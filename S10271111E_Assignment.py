@@ -282,14 +282,21 @@ def update_scores(player, high_scores):
         high_scores.append(formatted_score)
     else:
         for placing in range(len(high_scores)):
-            for tiebreak in range(1, 4):
-                if formatted_score[tiebreak] < (high_scores[placing])[tiebreak]:
+            overtake = ''
+            for tiebreak in range(1, 3):
+                if formatted_score[tiebreak] == (high_scores[placing])[tiebreak]:
+                    continue
+                elif formatted_score[tiebreak] < (high_scores[placing])[tiebreak]:
+                    overtake = 'y'
                     break
                 elif formatted_score[tiebreak] > (high_scores[placing])[tiebreak]:
-                    high_scores.insert(placing, formatted_score)
-                    if len(high_scores) > 5:
-                        high_scores.pop()
-                    return
+                    overtake = 'n'
+                    break
+            if overtake == 'y' or (overtake == '' and (formatted_score[3] > (high_scores[placing])[3])):
+                high_scores.insert(placing, formatted_score)
+                if len(high_scores) > 5:
+                    high_scores.pop()
+                return
         if len(high_scores) < 5:
             high_scores.append(formatted_score)
                 
