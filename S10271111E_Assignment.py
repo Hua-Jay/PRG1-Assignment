@@ -581,4 +581,3 @@ while True:
             if i < (len(score) - 1):
                 board += ','
         scoresheet.write(board + '\n')
-    
