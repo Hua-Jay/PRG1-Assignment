@@ -34,8 +34,8 @@ valid_townmenu = ['B', 'I', 'M', 'E', 'V', 'Q']
 valid_warehouse = ['C', 'S', 'G', 'L']
 valid_mining = ['W', 'A', 'S', 'D', 'M', 'I', 'P', 'Q', 'V']
 
-MAP_WIDTH = 0
-MAP_HEIGHT = 0
+MAP_WIDTH = 30
+MAP_HEIGHT = 10
 
 TURNS_PER_DAY = 20
 WIN_GP = 500
@@ -47,18 +47,14 @@ pickaxe_price = [50, 150]
 # It also updates MAP_WIDTH and MAP_HEIGHT
 def load_map(filename, map_struct):
     map_file = open(filename, 'r')
-    global MAP_WIDTH
-    global MAP_HEIGHT
     
     map_struct.clear()
     
     # TODO: Add your map loading code here
     map_levels = map_file.read().split('\n')
     for level in map_levels:
-        map_struct.append(level)
+        map_struct.append(list(level))
     
-    MAP_WIDTH = len(map_struct[0])
-    MAP_HEIGHT = len(map_struct)
 
     map_file.close()
 
@@ -98,7 +94,6 @@ def initialize_game(game_map, fog, player):
     player['max_load'] = 10
     player['current_load'] = 0
     player['state'] = 'main'
-    player['town'] = True
     name = input('Greetings, miner! What is your name? ')
     if name == '===':
         while '===' in  name or ':' in name: #prevent you from messing up the save file
@@ -114,10 +109,13 @@ def draw_map(game_map, fog, player):
     for y in range(len(game_map)):
         map += '|'
         for x in range(len(game_map[y])):
-            if x == player['x'] and y== player['y'] and player['town'] == False:
-                map += 'M'
+            if x == player['x'] and y== player['y']:
+                if player['state'] == 'town':
+                    map += 'M'
+                else:
+                    map += 'P'
             elif x == 0 and y == 0:
-                if player['town'] == False:
+                if player['state'] == 'town':
                     map += 'T'
                 else:
                     map += 'M'
@@ -174,7 +172,8 @@ def save_game(game_map, fog, player):
     for key in player:
         file.write(str(key) + ":" + str(player[key]) + "\n")
     file.close()
-    return 'Game saved.'
+    print('Game saved.')
+    return
         
 # This function loads the game
 def load_game(game_map, fog, player):
@@ -200,7 +199,7 @@ def load_game(game_map, fog, player):
     for i in range(2):
         new_data = []
         for data in dataread[i].split('\n'):
-            new_data.append(data)
+            new_data.append(data.split(','))
         loaded_data.append(new_data)
     game_map.extend(loaded_data[0])
     fog.extend(loaded_data[1])
@@ -212,6 +211,7 @@ def load_game(game_map, fog, player):
             if value.isdigit():
                 value = int(value)
             player[key] = value
+    
     print('Game Loaded.')
     return
 
@@ -220,8 +220,8 @@ def show_main_menu():
     print("--- Main Menu ----")
     print("(N)ew game")
     print("(L)oad saved game")
-    print("(H)igh scores")
     print("(Q)uit")
+    print("(H)igh scores")
     print("------------------")
 
 #this function opens the town menu
@@ -273,7 +273,7 @@ def show_high_scores(high_scores):
     else:
         for placing in range(len(high_scores)):
             print('{}. {} - {} days - {} steps'.format(placing + 1, high_scores[placing][0], high_scores[placing][1], high_scores[placing][2]))
-    print('---------------------------------------')
+    print('---------------------------------------\n')
 
 #to be used at end of each win
 def update_scores(player, high_scores):
@@ -295,7 +295,7 @@ def update_scores(player, high_scores):
                 
 def valid_input(valids, user_input): #function for validity checking
     while user_input not in valids: #loops if input isn't in list of valid inputs
-        user_input = input('Invalid input. Please enter a valid key: ')
+        user_input = input('Invalid input. Please enter a valid key: ').upper()
     return user_input
 #this function responds to possible player actions in the main menu
 def menu_options():
@@ -308,7 +308,6 @@ def menu_options():
         load_game(game_map, fog, player)
     elif choice == 'H':
         show_high_scores(high_scores)
-        menu_options()
     else:
         quit()
 
@@ -432,7 +431,8 @@ def mine_actions(game_map, player):
     show_mine(player)
     action = input('Action? ').upper()
     valid_input(valid_mining, action)
-    while player['turns_left'] != 0:
+    while player['turns_left'] != 1:
+        print('\n---------------------------------------------------')
         if action == 'M':
             print(draw_map(game_map, fog, player))
 
@@ -448,7 +448,7 @@ def mine_actions(game_map, player):
 
         else: #for movements
             if action == 'W':
-                if player['y'] != (0):
+                if player['y'] != 0:
                     player['y'] -= 1
                     if game_map[player['y']] [player['x']] != ' ':
                         #checks if ore can be mined
@@ -499,13 +499,12 @@ def mine_actions(game_map, player):
         show_mine(player)
         action = input('Action? ').upper()
         valid_input(valid_mining, action)
+    print('------------------------------------------------------')
     if player['turns_left'] == 0:
         print('You are exhausted.')
         player['turns_left'] = 0
     print('You place your portal stone here and zap back to town.')
     player['state'] = 'main'
-    if player['portal'] == False:
-        player['portal'] = True
 
 
 #--------------------------- MAIN GAME ---------------------------
@@ -531,7 +530,7 @@ while True:
         if player['state'] == 'town':
             while choice != 'E':
                 if choice == 'Q':
-                    quit()
+                    menu_options()
                 elif choice == 'B':
                     shop_options(player)
                 elif choice == 'M':
@@ -545,7 +544,6 @@ while True:
                 show_town_menu(player)
                 choice = input('Your choice? ').upper()
             player['state'] = 'mines'
-            player['town'] = False
             player['turns_left'] = 20
         if player['state'] == 'mines':
             print('---------------------------------------------------')
