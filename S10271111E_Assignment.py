@@ -359,7 +359,7 @@ def warehouse_options(player):
     while choice != 'L':
         if choice == 'C':
             if player['copper'] > 0:
-                player['GP'] += copper_price * player['copper']
+                player['GP'] += copper_price * player['copper'] * 500
                 print('\nYou sell {} copper for {} GP. You now have {} GP!'.format(player['copper'], (copper_price * player['copper']), player['GP']))
                 player['copper'] = 0
             else:
@@ -378,9 +378,12 @@ def warehouse_options(player):
                 player['gold'] = 0
             else:
                 print('\nYou have 0 gold to sell. Find more in the mines!')
-        show_warehouse(player)
-        choice = input('Your choice? ').upper()
-        choice = valid_input(valid_warehouse, choice)
+        if player['GP'] >= 500:
+            return
+        else:
+            show_warehouse(player)
+            choice = input('Your choice? ').upper()
+            choice = valid_input(valid_warehouse, choice)
     
 #this function displays the mine
 def show_mine(player):
@@ -539,12 +542,18 @@ while True:
                     save_game(game_map, fog, player)
                 elif choice == 'A':
                     warehouse_options(player)
+                    if player['GP'] >= 500:
+                        break # forces you out if you have hit the GP goal
                 elif choice == 'I':
                     show_information(player)
                 show_town_menu(player)
                 choice = input('Your choice? ').upper()
             player['state'] = 'mines'
             player['turns_left'] = 20
+
+        if player['GP'] >= 500:
+            break # forces you out if you have hit the GP goal
+            
         if player['state'] == 'mines':
             print('---------------------------------------------------')
             print('{:^51}'.format('DAY ' + str(player['day'])))
@@ -553,7 +562,7 @@ while True:
     print('-------------------------------------------------------------')
     print('Woo-hoo! Well done, {}, you have {} GP!'.format(player['name'], player['GP']))
     print('You now have enough to retire and play video games every day.')
-    print('And it only took you {} days and {} steps! You win!'.format(player['days'], player['steps']))
+    print('And it only took you {} days and {} steps! You win!'.format(player['day'], player['steps']))
     print('-------------------------------------------------------------\n')
     update_scores(player, high_scores)
     scoresheet = open('sundrop_caves_highscores.txt','w')
