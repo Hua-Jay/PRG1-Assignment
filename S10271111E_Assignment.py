@@ -308,6 +308,7 @@ def menu_options():
         load_game(game_map, fog, player)
     elif choice == 'H':
         show_high_scores(high_scores)
+        menu_options()
     else:
         quit()
 
@@ -359,7 +360,7 @@ def warehouse_options(player):
     while choice != 'L':
         if choice == 'C':
             if player['copper'] > 0:
-                player['GP'] += copper_price * player['copper'] * 500
+                player['GP'] += copper_price * player['copper']
                 print('\nYou sell {} copper for {} GP. You now have {} GP!'.format(player['copper'], (copper_price * player['copper']), player['GP']))
                 player['copper'] = 0
             else:
@@ -573,3 +574,4 @@ while True:
             if i < (len(score) - 1):
                 board += ','
         scoresheet.write(board + '\n')
+    
