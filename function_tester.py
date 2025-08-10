@@ -291,5 +291,4 @@ def menu_options():
         quit()
 
 # TODO: The game!
-menu_options()
-print(draw_view(game_map, fog, player))
+print(randint(prices['copper']))

@@ -11,10 +11,11 @@ except FileNotFoundError:
 player = {}
 game_map = []
 fog = []
-
+ore = ['copper','silver','gold']
 #list of valid inputs for each menu, excluding valid_buys
 valid_mainmenu = ['N', 'L', 'H', 'Q']
 valid_townmenu = ['B', 'I', 'M', 'E', 'V', 'Q']
+valid_warehouse = ['C', 'S', 'G']
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -136,7 +137,7 @@ def show_information(player):
           Load: {}/{}\n------------------------------\nGP: {}\nSteps Taken: {}\n------------------------------'.format(\
               player['name'],player['x'], player['y'], player['pickaxe_level'], player['gold'], player['silver'], player['copper'],\
                  player['current_load'], player['max_load'], player['GP'], player['steps']))
-    return #TODO add day info
+    return
 
 # This function saves the game
 def save_game(game_map, fog, player):
@@ -218,8 +219,6 @@ def show_town_menu(player):
 
 #this function opens the shop menu
 def show_shop_menu(player):
-    global ore
-    ore = ['','silver','gold']
     buyables = 0
     global valid_buys
     valid_buys = ['L']
@@ -276,7 +275,8 @@ def update_scores(player, high_scores):
 def valid_input(valids, user_input): #function for validity checking
     while user_input not in valids: #loops if input isn't in list of valid inputs
         user_input = input('Invalid input. Please enter a valid key: ')
-
+    return user_input
+#this function responds to possible player actions in the main menu
 def menu_options():
     show_main_menu()
     choice = input('Your choice? ').upper()
@@ -291,11 +291,12 @@ def menu_options():
     else:
         quit()
 
+#this function responds to possible player actions in the shop
 def shop_options(player):
     show_shop_menu(player)
-    choice = input('Your choice? ')
+    choice = input('Your choice? ').upper()
+    choice = valid_input(valid_buys, choice)
     while choice != 'L':
-        valid_input(valid_buys, choice)
         if choice == 'P':
             if player['GP'] >= pickaxe_price[player['pickaxe_level'] - 1]:
                 player['GP'] -= pickaxe_price[player['pickaxe_level'] - 1]
@@ -314,6 +315,53 @@ def shop_options(player):
         else:
             print('Insufficient GP. Sell ores for more GP!')
         show_shop_menu(player)
+        choice = input('Your choice? ').upper()
+        choice = valid_input(valid_buys, choice)
+        
+
+#displays the warehouse
+def show_warehouse(player):
+    gold_price = randint(prices['gold'])
+    print('------------------------ Warehouse ------------------------')
+    print('Ores stored in warehouse:\n')
+    print('Copper: ' + player['copper'])
+    print('Silver: ' + player['silver'])
+    print('Gold: ' + player['gold'])
+    print('Today\'s ore prices:\n')
+    print('Copper: ' + copper_price)
+    print('Silver: ' + silver_price)
+    print('Gold: ' + gold_price +'\n')
+    print('Sell (C)opper\nSell (S)ilver\nSell (G)old\n(L)eave warehouse')
+    print("-----------------------------------------------------------")
+
+#this function responds to possible player actions in the warehouse
+def warehouse_options(player):
+    choice = ''
+    while choice != 'L':
+        if choice == 'C':
+            if player['copper'] > 0:
+                player['GP'] += copper_price * player['copper']
+                print('You have sold {} copper for {} GP!'.format(player['copper'], (copper_price * player['copper'])))
+                player['copper'] = 0
+            else:
+                print('You have 0 copper to sell. Find more in the mines!')
+        elif choice == 'S':
+            if player['Silver'] > 0:
+                player['GP'] += silver_price * player['silver']
+                print('You have sold {} silver for {} GP!'.format(player['silver'], (silver_price * player['silver'])))
+                player['silver'] = 0
+            else:
+                print('You have 0 silver to sell. Find more in the mines!')
+        elif choice == 'G':
+            if player['gold'] > 0:
+                player['GP'] += gold_price * player['gold']
+                print('You have sold {} gold for {} GP!'.format(player['gold'], (gold_price * player['gold'])))
+                player['gold'] = 0
+            else:
+                print('You have 0 gold to sell. Find more in the mines!')
+        show_warehouse(player)
+        choice = input('Your choice? ').upper()
+        choice = valid_input(valid_warehouse, choice)
 
 #--------------------------- MAIN GAME ---------------------------
 game_state = 'main'
@@ -329,14 +377,22 @@ print("-----------------------------------------------------------")
 menu_options()
 while player['GP'] < 500:
     player['day'] += 1
+    copper_price = randint(prices[1, 3])
+    silver_price = randint(prices[5, 8])
+    gold_price = randint(prices[10, 18])
     choice = ''
     while choice != 'E':
         if choice == 'Q':
             quit()
-        if choice == 'B':
+        elif choice == 'B':
             shop_options(player)
         elif choice == 'M':
             print(draw_map(game_map, fog, player))
-        
+        elif choice == 'V':
+            save_game(game_map, fog, player)
+        elif choice == 'A':
+            warehouse_options(player)
+        elif choice == 'I':
+            show_information(player)
         show_town_menu(player)
         choice = input('Your choice? ').upper()
