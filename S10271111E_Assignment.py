@@ -90,8 +90,9 @@ def initialize_game(game_map, fog, player):
     player['state'] = 'main'
     player['town'] = True
     name = input('Greetings, miner! What is your name? ')
-    while name == '\n===\n':
-        name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
+    if name == '===':
+        while name == '===': #prevent you from messing up the save file
+            name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
     player['name'] = name
     print('Pleased to meet you, {}. Welcome to Sundrop Town!'.format(name))
 
