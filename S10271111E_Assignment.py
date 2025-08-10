@@ -110,7 +110,7 @@ def draw_map(game_map, fog, player):
         map += '|'
         for x in range(len(game_map[y])):
             if x == player['x'] and y== player['y']:
-                if player['state'] == 'town':
+                if player['state'] == 'town' or (y == 0 and x == 0):
                     map += 'M'
                 else:
                     map += 'P'
