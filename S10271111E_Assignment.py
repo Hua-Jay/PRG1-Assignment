@@ -101,7 +101,7 @@ def initialize_game(game_map, fog, player):
     player['town'] = True
     name = input('Greetings, miner! What is your name? ')
     if name == '===':
-        while name == '===': #prevent you from messing up the save file
+        while '===' in  name or ':' in name: #prevent you from messing up the save file
             name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
     player['name'] = name
     print('Pleased to meet you, {}. Welcome to Sundrop Town!'.format(name))
@@ -523,11 +523,11 @@ while True:
     while player['GP'] < 500:
         if player['state'] == 'main':
             player['day'] += 1
+            player['state'] = 'town'
         copper_price = randint(1, 3)
         silver_price = randint(5, 8)
         gold_price = randint(10, 18)
         choice = ''
-        player['state'] = 'town'
         if player['state'] == 'town':
             while choice != 'E':
                 if choice == 'Q':
@@ -544,9 +544,9 @@ while True:
                     show_information(player)
                 show_town_menu(player)
                 choice = input('Your choice? ').upper()
-        player['state'] = 'mines'
-        player['town'] = False
-        player['turns_left'] = 20
+            player['state'] = 'mines'
+            player['town'] = False
+            player['turns_left'] = 20
         if player['state'] == 'mines':
             print('---------------------------------------------------')
             print('{:^51}'.format('DAY ' + str(player['day'])))
