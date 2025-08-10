@@ -86,6 +86,7 @@ def initialize_game(game_map, fog, player):
     player['pickaxe_level'] = 1
     player['max_load'] = 10
     player['current_load'] = 0
+    player['state'] = 'main'
     name = input('Greetings, miner! What is your name? ')
     while name == '\n===\n':
         name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
@@ -385,7 +386,7 @@ while player['GP'] < 500:
     silver_price = randint(5, 8)
     gold_price = randint(10, 18)
     choice = ''
-    player['state'] == 'town'
+    player['state'] = 'town'
     if player['state'] == 'town':
         while choice != 'E':
             if choice == 'Q':
@@ -402,3 +403,5 @@ while player['GP'] < 500:
                 show_information(player)
             show_town_menu(player)
             choice = input('Your choice? ').upper()
+    player['state'] = 'mines'
+    

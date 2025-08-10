@@ -86,6 +86,7 @@ def initialize_game(game_map, fog, player):
     player['pickaxe_level'] = 1
     player['max_load'] = 10
     player['current_load'] = 0
+    player['state'] = 'main'
     name = input('Greetings, miner! What is your name? ')
     while name == '\n===\n':
         name = input('Your name reminds the mining gods of a shameful past. Through divine intervention, you are made to change your name to: ')
@@ -175,7 +176,7 @@ def load_game(game_map, fog, player):
         print('Save file empty. Game will be initialized instead')
         initialize_game(game_map, fog, player)
         return
-    if dataread == []:
+    if dataread == ['']:
         print('Save file empty. Game will be initialized instead')
         initialize_game(game_map, fog, player)
         return
@@ -367,7 +368,6 @@ def warehouse_options(player):
         choice = valid_input(valid_warehouse, choice)
 
 #--------------------------- MAIN GAME ---------------------------
-player['state'] = 'main'
 print("---------------- Welcome to Sundrop Caves! ----------------")
 print("You spent all your money to get the deed to a mine, a small")
 print("  backpack, a simple pickaxe and a magical portal stone.")
@@ -385,7 +385,7 @@ while player['GP'] < 500:
     silver_price = randint(5, 8)
     gold_price = randint(10, 18)
     choice = ''
-    player['state'] == 'town'
+    player['state'] = 'town'
     if player['state'] == 'town':
         while choice != 'E':
             if choice == 'Q':
