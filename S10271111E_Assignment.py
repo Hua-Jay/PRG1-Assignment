@@ -72,7 +72,7 @@ def initialize_game(game_map, fog, player):
     player['steps'] = 0
     player['turns'] = TURNS_PER_DAY
     player['visibility'] = 1
-    player['pickaxe_level'] = 0
+    player['pickaxe_level'] = 1
     player['max_load'] = 10
     player['current_load'] = 0
     player['high_scores'] = []
@@ -200,23 +200,27 @@ def show_town_menu(player):
 def show_shop_menu(player):
     ore = ['','silver','gold']
     buyables = 0
+    valid_buys = ['L']
     print()
     print('----------------------- Shop Menu -------------------------')
     if player['pickaxe_level'] < 3:
         buyables += 1
+        valid_buys.append('P')
         print('(P)ickaxe upgrade to level {} to mine {} ore for 50 GP'.format(player['pickaxe_level'] + 1,ore[player['pickaxe_level']]))
     if player['max_load'] < 20: #max steps is 20 per day, so only 20 is needed 
         buyables += 1
+        valid_buys.append('B')
         print('(B)ackpack upgrade to carry {} items for {} GP'.format(player['max_load'] + 2, player['max_load'] * 2))
     if player['visibility'] == 1:
         buyables += 1
+        valid_buys.append('T')
         print('Magic (T)orch to increase visiblity to a 5x5 box for 50 GP')
     if buyables == 0:
         print('You currently have the best possible equipment!')
     print('-----------------------------------------------------------')
     print('GP: {}'.format(player['GP']))
     print('-----------------------------------------------------------')
-            
+    return valid_buys
 #this function updates the high score list at the end of every playthrough
 def show_high_scores(high_scores):
     print()
@@ -259,5 +263,5 @@ print("  and live happily ever after?")
 print("-----------------------------------------------------------")
 
 # TODO: The game!
-    
+
     
