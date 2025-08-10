@@ -5,7 +5,7 @@ try:
     scoresheet = open('sundropcaveshighscores.txt','r')
     high_scores = scoresheet.read().split('\n')
     scoresheet.close()
-except FileNotFoundError:
+except FileNotFoundError or len(high_scores) == 0:
     high_scores = []
 
 player = {}
@@ -15,7 +15,7 @@ ore = ['copper','silver','gold']
 #list of valid inputs for each menu, excluding valid_buys
 valid_mainmenu = ['N', 'L', 'H', 'Q']
 valid_townmenu = ['B', 'I', 'M', 'E', 'V', 'Q']
-valid_warehouse = ['C', 'S', 'G']
+valid_warehouse = ['C', 'S', 'G', 'L']
 
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -175,6 +175,10 @@ def load_game(game_map, fog, player):
         print('Save file empty. Game will be initialized instead')
         initialize_game(game_map, fog, player)
         return
+    if dataread == []:
+        print('Save file empty. Game will be initialized instead')
+        initialize_game(game_map, fog, player)
+        return
     #save game_map and fog
     for i in range(2):
         new_data = []
@@ -321,16 +325,15 @@ def shop_options(player):
 
 #displays the warehouse
 def show_warehouse(player):
-    gold_price = randint(prices['gold'])
     print('------------------------ Warehouse ------------------------')
     print('Ores stored in warehouse:\n')
-    print('Copper: ' + player['copper'])
-    print('Silver: ' + player['silver'])
-    print('Gold: ' + player['gold'])
+    print('Copper: ' + str(player['copper']))
+    print('Silver: ' + str(player['silver']))
+    print('Gold: ' + str(player['gold']))
     print('Today\'s ore prices:\n')
-    print('Copper: ' + copper_price)
-    print('Silver: ' + silver_price)
-    print('Gold: ' + gold_price +'\n')
+    print('Copper: ' + str(copper_price))
+    print('Silver: ' + str(silver_price))
+    print('Gold: ' + str(gold_price) +'\n')
     print('Sell (C)opper\nSell (S)ilver\nSell (G)old\n(L)eave warehouse')
     print("-----------------------------------------------------------")
 
@@ -341,30 +344,30 @@ def warehouse_options(player):
         if choice == 'C':
             if player['copper'] > 0:
                 player['GP'] += copper_price * player['copper']
-                print('You have sold {} copper for {} GP!'.format(player['copper'], (copper_price * player['copper'])))
+                print('\nYou have sold {} copper for {} GP!'.format(player['copper'], (copper_price * player['copper'])))
                 player['copper'] = 0
             else:
-                print('You have 0 copper to sell. Find more in the mines!')
+                print('\nYou have 0 copper to sell. Find more in the mines!')
         elif choice == 'S':
             if player['Silver'] > 0:
                 player['GP'] += silver_price * player['silver']
-                print('You have sold {} silver for {} GP!'.format(player['silver'], (silver_price * player['silver'])))
+                print('\nYou have sold {} silver for {} GP!'.format(player['silver'], (silver_price * player['silver'])))
                 player['silver'] = 0
             else:
-                print('You have 0 silver to sell. Find more in the mines!')
+                print('\nYou have 0 silver to sell. Find more in the mines!')
         elif choice == 'G':
             if player['gold'] > 0:
                 player['GP'] += gold_price * player['gold']
-                print('You have sold {} gold for {} GP!'.format(player['gold'], (gold_price * player['gold'])))
+                print('\nYou have sold {} gold for {} GP!'.format(player['gold'], (gold_price * player['gold'])))
                 player['gold'] = 0
             else:
-                print('You have 0 gold to sell. Find more in the mines!')
+                print('\nYou have 0 gold to sell. Find more in the mines!')
         show_warehouse(player)
         choice = input('Your choice? ').upper()
         choice = valid_input(valid_warehouse, choice)
 
 #--------------------------- MAIN GAME ---------------------------
-game_state = 'main'
+player['state'] = 'main'
 print("---------------- Welcome to Sundrop Caves! ----------------")
 print("You spent all your money to get the deed to a mine, a small")
 print("  backpack, a simple pickaxe and a magical portal stone.")
@@ -376,23 +379,26 @@ print("-----------------------------------------------------------")
 # TODO: The game!
 menu_options()
 while player['GP'] < 500:
-    player['day'] += 1
-    copper_price = randint(prices[1, 3])
-    silver_price = randint(prices[5, 8])
-    gold_price = randint(prices[10, 18])
+    if player['state'] == 'main':
+        player['day'] += 1
+    copper_price = randint(1, 3)
+    silver_price = randint(5, 8)
+    gold_price = randint(10, 18)
     choice = ''
-    while choice != 'E':
-        if choice == 'Q':
-            quit()
-        elif choice == 'B':
-            shop_options(player)
-        elif choice == 'M':
-            print(draw_map(game_map, fog, player))
-        elif choice == 'V':
-            save_game(game_map, fog, player)
-        elif choice == 'A':
-            warehouse_options(player)
-        elif choice == 'I':
-            show_information(player)
-        show_town_menu(player)
-        choice = input('Your choice? ').upper()
+    player['state'] == 'town'
+    if player['state'] == 'town':
+        while choice != 'E':
+            if choice == 'Q':
+                quit()
+            elif choice == 'B':
+                shop_options(player)
+            elif choice == 'M':
+                print(draw_map(game_map, fog, player))
+            elif choice == 'V':
+                save_game(game_map, fog, player)
+            elif choice == 'A':
+                warehouse_options(player)
+            elif choice == 'I':
+                show_information(player)
+            show_town_menu(player)
+            choice = input('Your choice? ').upper()
