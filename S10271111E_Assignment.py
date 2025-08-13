@@ -110,15 +110,12 @@ def draw_map(game_map, fog, player):
         map += '|'
         for x in range(len(game_map[y])):
             if x == player['x'] and y== player['y']:
-                if player['state'] == 'town' or (y == 0 and x == 0):
+                if player['state'] == 'mines' or (player['y'] == 0 and player['x'] == 0):
                     map += 'M'
                 else:
                     map += 'P'
             elif x == 0 and y == 0:
-                if player['state'] == 'town':
                     map += 'T'
-                else:
-                    map += 'M'
             elif fog[y][x] == ' ':
                 map += game_map[y][x]
             else:
@@ -419,7 +416,7 @@ def attempt_mine(position, player):
             mined_ore = 'gold'
             mined = randint(1, 2)
         else:
-            print('Your pickaxe is not good enough to mine silver.')
+            print('Your pickaxe is not good enough to mine gold.')
             return False
     else:
         return True
@@ -427,12 +424,16 @@ def attempt_mine(position, player):
     addable_load = player['max_load'] - player['current_load']
     if addable_load > mined:
         player[mined_ore] += mined
+        player['current_load'] += mined
     elif addable_load == 0:
         print('You can\'t carry any more, so you can\'t go that way.')
         return False
     else:
         player[mined_ore] += addable_load
+        player['current_load'] += addable_load
         print('... but you can only carry {} more piece(s)!'.format(addable_load))
+        print()
+        return True
     position = ' '
     print()
     return True
@@ -455,6 +456,7 @@ def mine_actions(game_map, player):
         elif action == 'V':
             save_game(game_map, fog, player)
         elif action == 'P':
+            player['turns_left'] += 1
             break
 
         else: #for movements
@@ -511,9 +513,10 @@ def mine_actions(game_map, player):
         action = input('Action? ').upper()
         valid_input(valid_mining, action)
     print('------------------------------------------------------')
-    if player['turns_left'] == 0:
+
+    if player['turns_left'] == 1:
         print('You are exhausted.')
-        player['turns_left'] = 0
+    
     print('You place your portal stone here and zap back to town.')
     player['state'] = 'main'
 
@@ -531,9 +534,6 @@ print("-----------------------------------------------------------")
 while True:
     menu_options()
     while player['GP'] < 500:
-        if player['state'] == 'main':
-            player['day'] += 1
-            player['state'] = 'town'
         copper_price = randint(1, 3)
         silver_price = randint(5, 8)
         gold_price = randint(10, 18)
@@ -567,6 +567,8 @@ while True:
             print('{:^51}'.format('DAY ' + str(player['day'])))
             print('---------------------------------------------------')
             mine_actions(game_map, player)
+            player['current_load'] = 0
+            player['day'] += 1
     print('-------------------------------------------------------------')
     print('Woo-hoo! Well done, {}, you have {} GP!'.format(player['name'], player['GP']))
     print('You now have enough to retire and play video games every day.')
